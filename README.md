@@ -1,5 +1,5 @@
 # haskell_exercises
 
-# [Typeclassopedia][1]
+# [Project Euler][1]
 
-[1] : https://wiki.haskell.org/Typeclassopedia
+[1] : https://projecteuler.net/archives
