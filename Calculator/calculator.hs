@@ -111,5 +111,5 @@ factor = digit +++ do {symb "("; n <- expr; symb ")"; return n}
 
 digit :: Parser Int
 digit = do
-        x <- token $ sat isDigit
-        return $ ord x - ord '0'
+        x <- token $ many1 $ sat isDigit
+        return $ read x
