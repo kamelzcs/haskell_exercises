@@ -111,7 +111,7 @@ symb :: String -> Parser String
 symb cs = token $ string cs
 
 apply :: Parser Exp -> String -> [(Maybe Float, String)]
-apply exp = parse (fmap eval exp)
+apply exp = parse $ space >> (fmap eval exp)
 
 eval :: Exp -> Maybe Float
 eval (C x) = Just x
