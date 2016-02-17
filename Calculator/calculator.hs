@@ -110,10 +110,17 @@ token p = do
 symb :: String -> Parser String
 symb cs = token $ string cs
 
-apply :: Parser a -> String -> [(a, String)]
-apply p = parse $ do
-                  space
-                  p
+apply :: Parser Exp -> String -> [(Maybe Float, String)]
+apply exp = parse (fmap eval exp)
+
+eval :: Exp -> Maybe Float
+eval (C x) = Just x
+eval (Op "/" _ y) | Just 0 <- eval y = Nothing
+eval (Op op l r) = do
+                op <- lookup op ops
+                lv <- eval l
+                rv <- eval r
+                return $ op lv rv
 
 expr :: Parser Exp
 expr = term `chainl1` addop
