@@ -2,12 +2,23 @@ module Parser where
 import qualified Prelude
 import Prelude hiding ((++))
 import Data.Char
+import Control.Applicative hiding (many) -- Otherwise you can't do the Applicative instance.
+import Control.Monad (liftM, ap)
 
 newtype Parser a = Parser {parse :: String -> [(a, String)]}
 
+instance Functor Parser where
+  fmap = liftM
+
+instance Applicative Parser where
+  pure  = return
+  (<*>) = ap
+
+
 instance Monad Parser where
     return a = Parser $ \cs -> [(a, cs)]
-    p >>= f = Parser $ \cs -> concat [parse (f a) cs' |(a, cs') <- parse p cs]
+    p >>= f = Parser $ \cs -> concat [parse (f a) cs' | (a, cs') <- parse p cs]
+    p >> q = Parser $ \cs -> concat [parse q cs' | (a, cs') <- parse p cs]
 
 item :: Parser Char
 item = Parser $ \cs -> case cs of
@@ -98,13 +109,13 @@ expr :: Parser Int
 expr = term `chainl1` addop
 
 addop :: Parser(Int -> Int -> Int)
-addop = do {symb "+"; return (+)} +++ do {symb "-"; return (-)}
+addop = (symb "+" >> return (+)) +++ (symb "-" >> return (-))
 
 term :: Parser Int
 term = factor `chainl1` mulop
 
 mulop :: Parser (Int -> Int -> Int)
-mulop = do {symb "*"; return (*)} +++ do {symb "/"; return div}
+mulop = (symb "*" >> return (*)) +++ (symb "/" >> return div)
 
 factor :: Parser Int
 factor = digit +++ do {symb "("; n <- expr; symb ")"; return n}
