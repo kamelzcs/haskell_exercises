@@ -2,6 +2,7 @@ module Parser where
 import qualified Prelude
 import Prelude hiding ((++))
 import Data.Char
+import Data.List
 import Control.Applicative hiding (many) -- Otherwise you can't do the Applicative instance.
 import Control.Monad (liftM, ap)
 
@@ -18,7 +19,16 @@ instance Applicative Parser where
 instance Monad Parser where
     return a = Parser $ \cs -> [(a, cs)]
     p >>= f = Parser $ \cs -> concat [parse (f a) cs' | (a, cs') <- parse p cs]
-    p >> q = Parser $ \cs -> concat [parse q cs' | (a, cs') <- parse p cs]
+    p >> q = Parser $ \cs -> concat [parse q cs' | (_, cs') <- parse p cs]
+
+data Exp = C Float | Op String Exp Exp
+
+instance Show Exp where
+                show (C x) = show x
+                show (Op op l r) = "(" ++ show l ++ op ++ show r ++ ")"
+
+ops :: Fractional a => [(String, a->a->a)]
+ops = [("+", (+)), ("-", (-)), ("*", (*)), ("/", (/))]
 
 item :: Parser Char
 item = Parser $ \cs -> case cs of
@@ -29,16 +39,16 @@ class Monad m => MonadZero m where
         zero :: m a
 
 class MonadZero m => MonadPlus m where
-        (++) :: m a -> m a -> m a
+        mplus :: m a -> m a -> m a
 
 instance MonadZero Parser where
         zero = Parser $ const []
 
 instance MonadPlus Parser where
-        p ++ q = Parser $ \cs -> parse p cs Prelude.++ parse q cs
+        p `mplus` q = Parser $ \cs -> parse p cs ++ parse q cs
 
 (+++) :: Parser a -> Parser a -> Parser a
-p +++ q = Parser $ \cs -> case parse (p ++ q) cs of
+p +++ q = Parser $ \cs -> case parse (p `mplus` q) cs of
                               [] -> []
                               (x : _) -> [x]
 
