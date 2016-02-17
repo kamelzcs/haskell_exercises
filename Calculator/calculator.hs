@@ -105,22 +105,22 @@ apply p = parse $ do
                   space
                   p
 
-expr :: Parser Int
+expr :: Parser Float
 expr = term `chainl1` addop
 
-addop :: Parser(Int -> Int -> Int)
+addop :: Parser(Float -> Float -> Float)
 addop = (symb "+" >> return (+)) +++ (symb "-" >> return (-))
 
-term :: Parser Int
+term :: Parser Float
 term = factor `chainl1` mulop
 
-mulop :: Parser (Int -> Int -> Int)
-mulop = (symb "*" >> return (*)) +++ (symb "/" >> return div)
+mulop :: Parser (Float -> Float -> Float)
+mulop = (symb "*" >> return (*)) +++ (symb "/" >> return (/))
 
-factor :: Parser Int
+factor :: Parser Float
 factor = digit +++ do {symb "("; n <- expr; symb ")"; return n}
 
-digit :: Parser Int
+digit :: Parser Float
 digit = do
         x <- token $ many1 $ sat isDigit
         return $ read x
