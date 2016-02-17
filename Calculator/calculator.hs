@@ -21,13 +21,15 @@ instance Monad Parser where
     p >>= f = Parser $ \cs -> concat [parse (f a) cs' | (a, cs') <- parse p cs]
     p >> q = Parser $ \cs -> concat [parse q cs' | (_, cs') <- parse p cs]
 
-data Exp = C Float | Op String Exp Exp
+type Binary = String
+
+data Exp = C Float | Op Binary Exp Exp
 
 instance Show Exp where
                 show (C x) = show x
                 show (Op op l r) = "(" ++ show l ++ op ++ show r ++ ")"
 
-ops :: Fractional a => [(String, a->a->a)]
+ops :: Fractional a => [(Binary, a->a->a)]
 ops = [("+", (+)), ("-", (-)), ("*", (*)), ("/", (/))]
 
 item :: Parser Char
