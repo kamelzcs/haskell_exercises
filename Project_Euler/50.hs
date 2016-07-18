@@ -18,10 +18,10 @@ allCandidates = Prelude.map (zip [1..]) $ tails primeCandidates
 sequenceCandidates :: [[(Integer, Integer)]]
 sequenceCandidates = Prelude.map  (takeWhile (\(_, s) -> s < 1000000) . scanl1 (\(_, s) (i, s2) -> (i, s + s2)))  allCandidates
 
-validCandidates = filter isValid sequenceCandidates
+validCandidates = filter isValid $ concat sequenceCandidates
 
-isValid = not . null . filter (\(_, v) -> isPrime v)
+isValid = \(_, v) -> isPrime v
 
-solve = maximumBy (comparing fst) $ Prelude.map  (last . filter (\(_, v) -> isPrime v)) validCandidates
+solve = maximumBy (comparing fst) validCandidates
 
 main = print $ solve
