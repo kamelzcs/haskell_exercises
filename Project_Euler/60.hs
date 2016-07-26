@@ -1,3 +1,4 @@
+import Data.List
 
 primes = 2 : filter isPrime [3, 5..]
 isPrime :: Integer -> Bool
@@ -8,20 +9,18 @@ primeFactor p@(a : as) n
   | otherwise = primeFactor as n
 
 solve = do
-  a <- primes10000
-  let b' = coPrime a primes10000
-  b <- b'
-  let c' = coPrime b b'
-  c <- c'
-  let d' = coPrime c c'
-  d <- d'
-  let e' = coPrime d d'
+  a : as <- tails primes10000
+  let b' = coPrime a as
+  b : bs <- tails b'
+  let c' = coPrime b bs
+  c : cs <- tails c'
+  let d' = coPrime c cs
+  d : ds <- tails d'
+  let e' = coPrime d ds
   e <- e'
   return [a, b, c, d, e]
-  where coPrime x ys = [y | y <- ys, y > x, f x y]
+  where coPrime x ys = [y | y <- ys, f x y]
         f x y = (isPrime $ read $ show x ++ show y) && (isPrime $ read $ show y ++ show x)
         primes10000 = takeWhile (<10000) primes
-
-
 
 main = print $ sum $ head $ solve
