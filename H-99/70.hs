@@ -27,3 +27,7 @@ parse = do
 
 stringToTree :: String -> Tree Char
 stringToTree = fst . runState parse
+
+treeToString :: Tree Char -> String
+treeToString (Node x []) = [x] ++ "^"
+treeToString (Node x xs) = [x] ++ (concatMap treeToString xs) ++ "^"
