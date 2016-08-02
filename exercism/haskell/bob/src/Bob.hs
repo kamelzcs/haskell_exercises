@@ -16,13 +16,13 @@ instance Show Bob where
 parseQuesion :: Parser Bob
 parseQuesion = endWith '?' >> return Question
 
-endWith :: Char -> Parser String
-endWith x = many anyChar <* char x
+endWith :: Char -> Parser ()
+endWith x = many anyChar >> char x >> return ()
 
 parseYell :: Parser Bob
 parseYell = (endWith '!' <|> allCapital) >> return Yell
   where
-    allCapital = many (upper <|> space) <* char '?'
+    allCapital = many (upper <|> space) >> char '?' >> return ()
 
 parseAddress :: Parser Bob
 parseAddress = (string "\n\r \t\v\xA0\x2002" <|> many space) >> return Address
