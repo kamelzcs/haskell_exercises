@@ -1,9 +1,5 @@
 module Bob (responseFor) where
-
-import Text.Parsec.String
-import Text.Parsec.Combinator
-import Text.Parsec
-
+import Data.Char
 
 data Bob = Question | Yell | Address | Other
 
@@ -13,27 +9,16 @@ instance Show Bob where
   show Address = "Fine. Be that way!"
   show Other = "Whatever."
 
-parseQuesion :: Parser Bob
-parseQuesion = endWith '?' >> return Question
+isHell x = x == (map toUpper x) || last x == '!'
+isQuestion x = last x == '?'
+isAddress x = all $ map isSpace x
 
-endWith :: Char -> Parser ()
-endWith x = many anyChar >> char x >> return ()
-
-parseYell :: Parser Bob
-parseYell = (endWith '!' <|> allCapital) >> return Yell
-  where
-    allCapital = many (upper <|> space) >> char '?' >> return ()
-
-parseAddress :: Parser Bob
-parseAddress = (string "\n\r \t\v\xA0\x2002" <|> many space) >> return Address
-
-parseOther :: Parser Bob
-parseOther = many anyChar >> return Other
-
-parseBob :: Parser Bob
-parseBob = parseYell <|> parseQuesion <|> parseAddress <|> parseOther
+parse :: String -> Bob
+parse s
+  | isHell s = Yell
+  | isQuestion s = Question
+  | isAddress s = Address
+  | otherwise = Other
 
 responseFor :: String -> String
-responseFor input = case parse parseBob "Bob" input of
-  Left err -> "No match: " ++ show err
-  Right val -> show val
+responseFor = show . parse
