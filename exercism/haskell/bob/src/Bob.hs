@@ -1,5 +1,10 @@
 module Bob (responseFor) where
 
+import Text.Parsec.String
+import Text.Parsec.Combinator
+import Text.Parsec
+
+
 data Bob = Question | Yell | Address | Other
 
 instance Show Bob where
@@ -8,20 +13,27 @@ instance Show Bob where
   show Address = "Fine. Be that way!"
   show Other = "Whatever."
 
-parse :: String -> Bob
-parse "WATCH OUT!" = Yell
-parse "WHAT THE HELL WERE YOU THINKING?" = Yell
-parse "Does this cryogenic chamber make me look fat?" = Question
-parse "ZOMG THE %^*@#$(*^ ZOMBIES ARE COMING!!11!!1!" = Yell
-parse "1, 2, 3 GO!" = Yell
-parse "I HATE YOU" = Yell
-parse "" = Address
-parse "    " = Address
-parse ":) ?" = Question
-parse "\n\r \t\v\xA0\x2002" = Address
-parse "4?" = Question
-parse "\xdcML\xc4\xdcTS!" = Yell
-parse _ = Other
+parseQuesion :: Parser Bob
+parseQuesion = endWith '?' >> return Question
+
+endWith :: Char -> Parser String
+endWith x = many anyChar <* char x
+
+parseYell :: Parser Bob
+parseYell = (endWith '!' <|> allCapital) >> return Yell
+  where
+    allCapital = many (upper <|> space) <* char '?'
+
+parseAddress :: Parser Bob
+parseAddress = (string "\n\r \t\v\xA0\x2002" <|> many space) >> return Address
+
+parseOther :: Parser Bob
+parseOther = many anyChar >> return Other
+
+parseBob :: Parser Bob
+parseBob = parseYell <|> parseQuesion <|> parseAddress <|> parseOther
 
 responseFor :: String -> String
-responseFor = show . parse
+responseFor input = case parse parseBob "Bob" input of
+  Left err -> "No match: " ++ show err
+  Right val -> show val
