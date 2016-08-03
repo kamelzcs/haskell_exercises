@@ -9,9 +9,9 @@ instance Show Bob where
   show Address = "Fine. Be that way!"
   show Other = "Whatever."
 
-isHell x = x == (map toUpper x) || last x == '!'
-isQuestion x = last x == '?'
-isAddress x = all $ map isSpace x
+isHell x = (any isAlpha x) && (x == (map toUpper x))
+isQuestion x = length x > 0 && last x == '?'
+isAddress x = all isSpace x
 
 parse :: String -> Bob
 parse s
