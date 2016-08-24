@@ -50,8 +50,11 @@ setCurrentStreet :: String -> Person -> Person
 setCurrentStreet s p = set (address.street) s p
 
 setBirthMonth :: Int -> Person -> Person
-setBirthMonth = undefined
+setBirthMonth m p = set (born.bornOn.dayGregorian.month) m p
+
+dayGregorian :: Iso' Day Gregorian
+dayGregorian = iso (\day -> let (y, m, d) = toGregorian day in Gregorian y m d) (\(Gregorian y m d) -> fromGregorian y m d)
 
 -- | Transform both birth and current street names.
 renameStreets :: (String -> String) -> Person -> Person
-renameStreets = undefined
+renameStreets f p =  over (address.street) f $ over (born.bornAt.street) f p
